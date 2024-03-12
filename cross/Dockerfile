@@ -3,13 +3,13 @@ FROM $CROSS_BASE_IMAGE
 
 # Install Alpine's `apk` to be able to install musl packages
 COPY --from=jorgeprendes420/apk-anywhere / /
-ENV MARCH=${CROSS_CMAKE_SYSTEM_PROCESSOR}
+ENV MARCH=x86_64
 RUN apk-init ${MARCH} ${CROSS_SYSROOT}
 
 # configure libsecccomp-rs to use static linking
-RUN apk-${MARCH} add libseccomp-static libseccomp-dev
+RUN apk-${MARCH} add libseccomp libseccomp-static libseccomp-dev
 ENV LIBSECCOMP_LINK_TYPE="static"
-ENV LIBSECCOMP_LIB_PATH="${CROSS_SYSROOT}/lib"
+ENV LIBSECCOMP_LIB_PATH="/apk-x86_64/usr/lib"
 
 # wws needs zlib (though libssh2-sys)
 RUN apk-${MARCH} add zlib-dev zlib-static
