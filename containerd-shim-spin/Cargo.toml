@@ -11,7 +11,7 @@ Containerd shim for running Spin workloads.
 """
 
 [dependencies]
-containerd-shim-wasm = { git = "https://github.com/rajatjindal/runwasi", branch = "debug6" }
+containerd-shim-wasm = { git = "https://github.com/rajatjindal/runwasi", rev = "26e19008642c786f85bd96db1ef544fe211d125d" }
 containerd-shim = "0.6.0"
 log = "0.4"
 spin-app = { git = "https://github.com/fermyon/spin", tag = "v2.2.0" }
