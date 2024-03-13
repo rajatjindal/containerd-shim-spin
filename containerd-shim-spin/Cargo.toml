@@ -36,4 +36,4 @@ futures = "0.3"
 ctrlc = { version = "3.2", features = ["termination"] }
 
 [patch.crates-io]
-containerd-shim = { git = 'https://github.com/rajatjindal/rust-extensions/crates/shim',  rev = "980343f1f8ef808df14eff9c9970016d67c4f0ec" }
+containerd-shim = { git = 'https://github.com/rajatjindal/rust-extensions/crates/shim',  rev = "4eb74625d031d49b1ced8b01fd09caa4241c833d" }
