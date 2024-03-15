@@ -1213,16 +1213,6 @@ dependencies = [
 
 [[package]]
 name = "command-fds"
-version = "0.2.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f190f3c954f7bca3c6296d0ec561c739bdbe6c7e990294ed168d415f6e1b5b01"
-dependencies = [
- "nix 0.27.1",
- "thiserror",
-]
-
-[[package]]
-name = "command-fds"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7bb11bd1378bf3731b182997b40cefe00aba6a6cc74042c8318c1b271d3badf7"
@@ -1274,39 +1264,12 @@ dependencies = [
 
 [[package]]
 name = "containerd-shim"
-version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "063d0e137d508846210c2f8b6c6dc3db9f1abd4c20b0a9aecdb962385dcb7899"
-dependencies = [
- "cgroups-rs",
- "command-fds 0.2.3",
- "containerd-shim-protos 0.6.0",
- "go-flag",
- "lazy_static",
- "libc",
- "log",
- "mio",
- "nix 0.27.1",
- "oci-spec",
- "os_pipe",
- "page_size",
- "prctl",
- "serde",
- "serde_json",
- "signal-hook",
- "thiserror",
- "time",
- "windows-sys 0.48.0",
-]
-
-[[package]]
-name = "containerd-shim"
 version = "0.7.0"
 source = "git+https://github.com/rajatjindal/rust-extensions?rev=1cb5e1501d9a8c95d039792e8b27ae2f9e68e02d#1cb5e1501d9a8c95d039792e8b27ae2f9e68e02d"
 dependencies = [
  "cgroups-rs",
- "command-fds 0.3.0",
- "containerd-shim-protos 0.7.0",
+ "command-fds",
+ "containerd-shim-protos",
  "go-flag",
  "lazy_static",
  "libc",
@@ -1323,17 +1286,6 @@ dependencies = [
  "thiserror",
  "time",
  "windows-sys 0.52.0",
-]
-
-[[package]]
-name = "containerd-shim-protos"
-version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "967dbd2804aceb398bd7d867410342d68b9d74c1fead823ad8353b3ab5f23eb7"
-dependencies = [
- "protobuf 3.2.0",
- "ttrpc",
- "ttrpc-codegen",
 ]
 
 [[package]]
@@ -1368,7 +1320,7 @@ version = "0.12.0"
 dependencies = [
  "anyhow",
  "cgroups-rs",
- "containerd-shim 0.6.0",
+ "containerd-shim",
  "containerd-shim-wasm",
  "ctrlc",
  "futures",
@@ -1402,7 +1354,7 @@ dependencies = [
  "caps",
  "chrono",
  "containerd-client",
- "containerd-shim 0.7.0",
+ "containerd-shim",
  "crossbeam",
  "dbus",
  "futures",
