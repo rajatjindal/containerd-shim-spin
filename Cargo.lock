@@ -8311,3 +8311,8 @@ dependencies = [
  "cc",
  "pkg-config",
 ]
+
+[[patch.unused]]
+name = "containerd-shim"
+version = "0.7.0"
+source = "git+https://github.com/rajatjindal/rust-extensions?rev=1cb5e1501d9a8c95d039792e8b27ae2f9e68e02d#1cb5e1501d9a8c95d039792e8b27ae2f9e68e02d"
