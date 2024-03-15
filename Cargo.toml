@@ -15,4 +15,4 @@ members = [
 ]
 
 [patch.crates-io]
-containerd-shim = { git = 'https://github.com/rajatjindal/rust-extensions/crates/shim',  rev = "1cb5e1501d9a8c95d039792e8b27ae2f9e68e02d" }
+containerd-shim = { git = 'https://github.com/rajatjindal/rust-extensions',  rev = "1cb5e1501d9a8c95d039792e8b27ae2f9e68e02d" }
