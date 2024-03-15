@@ -11,7 +11,7 @@ Containerd shim for running Spin workloads.
 """
 
 [dependencies]
-containerd-shim-wasm = { git = "https://github.com/rajatjindal/runwasi", rev = "f3e9422f8271bb7a4b1203a9e6875b77dab5b033" }
+containerd-shim-wasm = { git = "https://github.com/rajatjindal/runwasi", rev = "1646d4bd0b9cef089b51bd7c9ca528204a8669d6" }
 containerd-shim = { version = "0.6.0" }
 log = "0.4"
 spin-app = { git = "https://github.com/fermyon/spin", tag = "v2.2.0" }
@@ -39,4 +39,4 @@ ctrlc = { version = "3.2", features = ["termination"] }
 cgroups-rs = "0.3.4"
 
 [patch.crates-io]
-containerd-shim = { git = 'https://github.com/Mossaka/rust-extensions/crates/shim',  rev = "bfebb9aabc709e6b0efb5378cc3125c686ae3a3e" }
+containerd-shim = { git = 'https://github.com/rajatjindal/rust-extensions/crates/shim',  rev = "1cb5e1501d9a8c95d039792e8b27ae2f9e68e02d" }
