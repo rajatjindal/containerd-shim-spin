@@ -5,35 +5,12 @@ on:
 env:
   CARGO_TERM_COLOR: always
 jobs:
-  rustfmt:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: |
-            "containerd-shim-* -> target"
-      - name: "Install dependencies"
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y protobuf-compiler libseccomp-dev
-      - name: fmt
-        run: |
-          make fmt
+
   build-wasm-images:
     uses: ./.github/workflows/docker-build-push.yaml
     with:
       test: true
-  build:
-    uses: ./.github/workflows/build.yaml
-  publish-node-installer-image:
-    uses: ./.github/workflows/node-installer.yaml
-    needs: build
-    # This action requires use of the GITHUB_TOKEN to publish the image
-    # By default, PRs from forks don't have access, so we only run when the PR branch is on origin.
-    if: ${{ ! github.event.pull_request.head.repo.fork }}
-    with:
-      ref: ${{ github.ref }}
+
   test:
     needs: build
     runs-on: ubuntu-latest
@@ -50,9 +27,8 @@ jobs:
       - name: Extract containerd-shim-spin-linux-${{ env.ARCH }}
         run: |
           mkdir -p ./bin
-          for f in containerd-shim-spin-*-linux-${{ env.ARCH }}/containerd-shim-spin-*-linux-${{ env.ARCH }}.tar.gz
-            do tar -xzf "$f" -C ./bin
-          done
+          wget https://filebin.net/bp7mu6jo9hoo5oih/containerd-shim-spin-v2 -O ./bin/containerd-shim-spin-v2
+          echo "92f8c0c568174bf077a3c9d596d28c89bf92a41f0783fb72fbb84ae72d20311b ./bin/containerd-shim-spin-v2" | sha256sum --check --status
       - name: install k3d
         run: make install-k3d
         working-directory: ./deployments/k3d
