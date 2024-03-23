@@ -24,6 +24,6 @@ kubectl wait --for=condition=ready node --all --timeout=120s
 #   k3d image import "${OUT_DIRS[$i]}/img.tar" -c "$cluster_name"
 # done
 
-# sleep 5
+sleep 10
 
 echo ">>> cluster is ready"
