@@ -13,4 +13,5 @@ kubectl describe pod -l app=wasm-spin
 CID=`docker ps | grep "$NODE" | awk '{print $1}'`
 echo "cid is $CID"
 
+docker exec $CID ps -ef
 docker exec $CID cat /var/lib/rancher/k3s/agent/containerd/containerd.log
