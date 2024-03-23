@@ -12,4 +12,4 @@ echo "node is $NODE"
 CID=`docker ps | grep "$NODE" | awk '{print $1}'`
 echo "cid is $CID"
 
-docker exec -it $CID cat /var/lib/rancher/k3s/agent/containerd/containerd.log
+docker exec $CID cat /var/lib/rancher/k3s/agent/containerd/containerd.log
