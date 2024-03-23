@@ -17,13 +17,13 @@ k3d cluster create "$cluster_name" --image k3d-shim-test --api-port 6551 -p '808
 kubectl wait --for=condition=ready node --all --timeout=120s
 
 # Iterate through the Docker images and build them
-for i in "${!DOCKER_IMAGES[@]}"; do
-  docker buildx build -t "${IMAGES[$i]}:latest" "./images/${DOCKER_IMAGES[$i]}" --load
-  mkdir -p "${OUT_DIRS[$i]}"
-  docker save -o "${OUT_DIRS[$i]}/img.tar" "${IMAGES[$i]}:latest"
-  k3d image import "${OUT_DIRS[$i]}/img.tar" -c "$cluster_name"
-done
+# for i in "${!DOCKER_IMAGES[@]}"; do
+#   docker buildx build -t "${IMAGES[$i]}:latest" "./images/${DOCKER_IMAGES[$i]}" --load
+#   mkdir -p "${OUT_DIRS[$i]}"
+#   docker save -o "${OUT_DIRS[$i]}/img.tar" "${IMAGES[$i]}:latest"
+#   k3d image import "${OUT_DIRS[$i]}/img.tar" -c "$cluster_name"
+# done
 
-sleep 5
+# sleep 5
 
 echo ">>> cluster is ready"
