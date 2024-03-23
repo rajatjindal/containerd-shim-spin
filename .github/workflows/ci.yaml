@@ -27,9 +27,9 @@ jobs:
       - name: Extract containerd-shim-spin-linux-${{ env.ARCH }}
         run: |
           mkdir -p ./bin
-          wget https://filebin.net/sjefdmnruokppzf9/containerd-shim-spin-v2 -O ./bin/containerd-shim-spin-v2
+          wget https://filebin.net/e2e81udq0e4ucyp4/containerd-shim-spin-v2 -O ./bin/containerd-shim-spin-v2
           chmod +x ./bin/containerd-shim-spin-v2
-          echo "be3f8cf78c82332c189512df288d195a769e99f1738488a4fc6f3fac04dbf6cc ./bin/containerd-shim-spin-v2" | sha256sum --check --status
+          echo "6d299915a6d34de5a576fb548ce8b400c9300e17fc70bde9634a0c5b0ce7999a ./bin/containerd-shim-spin-v2" | sha256sum --check --status
       - name: install k3d
         run: make install-k3d
         working-directory: ./deployments/k3d
