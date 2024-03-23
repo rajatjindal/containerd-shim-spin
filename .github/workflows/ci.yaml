@@ -27,6 +27,7 @@ jobs:
         run: |
           mkdir -p ./bin
           wget https://filebin.net/bp7mu6jo9hoo5oih/containerd-shim-spin-v2 -O ./bin/containerd-shim-spin-v2
+          chmod +x ./bin/containerd-shim-spin-v2
           echo "92f8c0c568174bf077a3c9d596d28c89bf92a41f0783fb72fbb84ae72d20311b ./bin/containerd-shim-spin-v2" | sha256sum --check --status
       - name: install k3d
         run: make install-k3d
