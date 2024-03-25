@@ -2,22 +2,22 @@
 
 set -euo pipefail
 
-top
+top -b -n 1
 
 ## test that the workload pods can be terminated
 NODE=`kubectl get pod $(kubectl get pod -l app=wasm-spin --no-headers | awk '{print $1}') --no-headers -o custom-columns=":spec.nodeName"`
 echo "node is $NODE"
 
-top 
+top -b -n 1
 
 CID=`docker ps | grep "$NODE" | awk '{print $1}'`
 echo "cid is $CID"
 
-top
+top -b -n 1
 
 kubectl delete pod -l app=wasm-spin --timeout 20s || true
 
-top
+top -b -n 1
 
 docker exec $CID ps -ef
 
