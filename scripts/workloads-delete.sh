@@ -28,4 +28,3 @@ sleep 15
 
 docker exec $CID ps -ef
 docker exec $CID cat /var/lib/rancher/k3s/agent/containerd/containerd.log
-
