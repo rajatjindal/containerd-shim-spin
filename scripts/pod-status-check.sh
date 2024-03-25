@@ -14,6 +14,8 @@ for status in $pod_statuses; do
   fi
 done
 
+sleep 30
+
 if $all_running; then
   echo "All pods are running fine."
 else
