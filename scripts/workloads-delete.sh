@@ -25,3 +25,4 @@ kubectl describe pod -l app=wasm-spin
 
 docker exec $CID ps -ef
 docker exec $CID cat /var/lib/rancher/k3s/agent/containerd/containerd.log
+
