@@ -15,6 +15,8 @@ echo "cid is $CID"
 
 top -b -n 1
 
+docker exec $CID ps -ef
+
 kubectl delete pod -l app=wasm-spin --timeout 20s || true
 
 top -b -n 1
