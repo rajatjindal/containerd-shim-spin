@@ -17,6 +17,8 @@ kubectl apply -f tests/workloads
 # wait for all the pods to be ready
 kubectl wait --for=condition=ready --timeout=50s pod --all
 
+sleep 30
+
 # get and describe all the pods
 echo ">>> Pods:"
 kubectl get pods -o wide
