@@ -24,5 +24,8 @@ docker exec $CID ps -ef
 kubectl describe pod -l app=wasm-spin
 
 docker exec $CID ps -ef
+
+## hopefully wait for process to get killed after 30s timeout
+sleep 15
 docker exec $CID cat /var/lib/rancher/k3s/agent/containerd/containerd.log
 
