@@ -415,23 +415,6 @@ pub enum ResolvedAppSource {
 }
 
 impl ResolvedAppSource {
-    // pub fn trigger_type(&self) -> anyhow::Result<&str> {
-    //     let types = match self {
-    //         ResolvedAppSource::File { manifest, .. } => {
-    //             manifest.triggers.keys().collect::<HashSet<_>>()
-    //         }
-    //         ResolvedAppSource::OciRegistry { locked_app } => locked_app
-    //             .triggers
-    //             .iter()
-    //             .map(|t| &t.trigger_type)
-    //             .collect::<HashSet<_>>(),
-    //     };
-
-    //     ensure!(!types.is_empty(), "no triggers in app");
-    //     ensure!(types.len() == 1, "multiple trigger types not yet supported");
-    //     Ok(types.into_iter().next().unwrap())
-    // }
-
     pub fn trigger_types(&self) -> anyhow::Result<Vec<&str>> {
         let types = match self {
             ResolvedAppSource::File { manifest, .. } => {
@@ -452,7 +435,7 @@ impl ResolvedAppSource {
 fn trigger_command_for_resolved_app_source(resolved: &ResolvedAppSource) -> Result<Vec<String>> {
     let trigger_types = resolved.trigger_types()?;
 
-    let mut types = vec![];
+    let mut types = Vec::with_capacity(trigger_types.len());
     for trigger_type in trigger_types.iter() {
         match trigger_type.to_owned() {
             RedisTrigger::TRIGGER_TYPE | HttpTrigger::TRIGGER_TYPE | SqsTrigger::TRIGGER_TYPE => {
