@@ -1,6 +1,7 @@
 use anyhow::{anyhow, ensure, Context, Result};
 use containerd_shim_wasm::container::{Engine, RuntimeContext, Stdio};
 use containerd_shim_wasm::sandbox::WasmLayer;
+use futures::future;
 use log::info;
 use oci_spec::image::MediaType;
 use spin_app::locked::LockedApp;
@@ -23,7 +24,6 @@ use std::path::{Path, PathBuf};
 use tokio::runtime::Runtime;
 use trigger_sqs::SqsTrigger;
 use url::Url;
-use futures::future::join_all;
 
 const SPIN_ADDR: &str = "0.0.0.0:80";
 /// RUNTIME_CONFIG_PATH specifies the expected location and name of the runtime
@@ -237,10 +237,15 @@ impl SpinEngine {
 
             futureslist.push(f)
         }
+
+        let (result, _, rest) = future::select_all(futureslist).await;
+
+        drop(rest);
         
-        info!(" >>> notifying main thread we are about to start");
-        let x = join_all(futureslist).await;
-        x.into_iter().nth(0).unwrap()
+        result
+        // info!(" >>> notifying main thread we are about to start");
+        // let x = join_all(futureslist).await;
+        // x.into_iter().nth(0).unwrap()
     }
 
     async fn load_resolved_app_source(
