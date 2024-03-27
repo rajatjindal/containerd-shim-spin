@@ -196,7 +196,7 @@ impl SpinEngine {
         app_source: AppSource,
     ) -> Result<()> {
         let working_dir = PathBuf::from("/");
-        let mut futureslist = vec![];
+        let mut futures_list = Vec::with_capacity(trigger_types.len());
         for trigger_type in trigger_types.iter() {
             let f = match trigger_type.to_owned() {
                 HttpTrigger::TRIGGER_TYPE => {
@@ -235,10 +235,11 @@ impl SpinEngine {
                 }
             };
 
-            futureslist.push(f)
+            futures_list.push(f)
         }
 
-        let (result, _, rest) = future::select_all(futureslist).await;
+        // exit as soon as any of the trigger completes/exits
+        let (result, _, rest) = future::select_all(futures_list).await;
 
         drop(rest);
         
