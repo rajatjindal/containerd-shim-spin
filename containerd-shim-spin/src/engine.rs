@@ -23,6 +23,7 @@ use std::path::{Path, PathBuf};
 use tokio::runtime::Runtime;
 use trigger_sqs::SqsTrigger;
 use url::Url;
+use futures::future::join_all;
 
 const SPIN_ADDR: &str = "0.0.0.0:80";
 /// RUNTIME_CONFIG_PATH specifies the expected location and name of the runtime
@@ -182,72 +183,64 @@ impl SpinEngine {
         env::set_var("XDG_CACHE_HOME", &cache_dir);
         let app_source = self.app_source(ctx, &cache).await?;
         let resolved_app_source = self.resolve_app_source(app_source.clone(), &cache).await?;
-        let trigger_cmd = trigger_command_for_resolved_app_source(&resolved_app_source)
+        let trigger_cmds = trigger_command_for_resolved_app_source(&resolved_app_source)
             .with_context(|| format!("Couldn't find trigger executor for {app_source:?}"))?;
         let locked_app = self.load_resolved_app_source(resolved_app_source).await?;
-        self.run_trigger(&trigger_cmd, locked_app, app_source).await
+        self.run_trigger(trigger_cmds.iter().map(|s| s.as_ref()).collect(), locked_app, app_source).await
     }
 
     async fn run_trigger(
         &self,
-        trigger_type: &str,
+        trigger_types: Vec<&str>,
         app: LockedApp,
         app_source: AppSource,
     ) -> Result<()> {
         let working_dir = PathBuf::from("/");
-        let f = match trigger_type {
-            HttpTrigger::TRIGGER_TYPE => {
-                let http_trigger: HttpTrigger = self
-                    .build_spin_trigger(working_dir, app, app_source)
-                    .await
-                    .context("failed to build spin trigger")?;
+        let mut futureslist = vec![];
+        for trigger_type in trigger_types.iter() {
+            let f = match trigger_type.to_owned() {
+                HttpTrigger::TRIGGER_TYPE => {
+                    let http_trigger: HttpTrigger = self
+                        .build_spin_trigger(working_dir.clone(), app.clone(), app_source.clone())
+                        .await
+                        .context("failed to build spin trigger")?;
+    
+                    info!(" >>> running spin http trigger");
+                    http_trigger.run(spin_trigger_http::CliArgs {
+                        address: parse_addr(SPIN_ADDR).unwrap(),
+                        tls_cert: None,
+                        tls_key: None,
+                    })
+                }
+                RedisTrigger::TRIGGER_TYPE => {
+                    let redis_trigger: RedisTrigger = self
+                        .build_spin_trigger(working_dir.clone(), app.clone(), app_source.clone())
+                        .await
+                        .context("failed to build spin trigger")?;
+    
+                    info!(" >>> running spin redis trigger");
+                    redis_trigger.run(spin_trigger::cli::NoArgs)
+                }
+                SqsTrigger::TRIGGER_TYPE => {
+                    let sqs_trigger: SqsTrigger = self
+                        .build_spin_trigger(working_dir.clone(), app.clone(), app_source.clone())
+                        .await
+                        .context("failed to build spin trigger")?;
+    
+                    info!(" >>> running spin sqs trigger");
+                    sqs_trigger.run(spin_trigger::cli::NoArgs)
+                }
+                _ => {
+                    todo!("Only Http, Redis and SQS triggers are currently supported.")
+                }
+            };
 
-                info!(" >>> running spin trigger");
-                http_trigger.run(spin_trigger_http::CliArgs {
-                    address: parse_addr(SPIN_ADDR).unwrap(),
-                    tls_cert: None,
-                    tls_key: None,
-                })
-            }
-            RedisTrigger::TRIGGER_TYPE => {
-                let redis_trigger: RedisTrigger = self
-                    .build_spin_trigger(working_dir, app, app_source)
-                    .await
-                    .context("failed to build spin trigger")?;
-
-                info!(" >>> running spin trigger");
-                redis_trigger.run(spin_trigger::cli::NoArgs)
-            }
-            SqsTrigger::TRIGGER_TYPE => {
-                let sqs_trigger: SqsTrigger = self
-                    .build_spin_trigger(working_dir, app, app_source)
-                    .await
-                    .context("failed to build spin trigger")?;
-
-                info!(" >>> running spin trigger");
-                sqs_trigger.run(spin_trigger::cli::NoArgs)
-            }
-            _ => {
-                todo!("Only Http, Redis and SQS triggers are currently supported.")
-            }
-        };
-        info!(" >>> notifying main thread we are about to start");
-        let (abortable, abort_handle) = futures::future::abortable(f);
-        ctrlc::set_handler(move || abort_handle.abort())?;
-        match abortable.await {
-            Ok(Ok(())) => {
-                info!("Trigger executor shut down: exiting");
-                Ok(())
-            }
-            Ok(Err(err)) => {
-                log::error!("ERROR >>> Trigger executor failed: {:?}", err);
-                Err(err)
-            }
-            Err(aborted) => {
-                info!("Received signal to abort: {:?}", aborted);
-                Ok(())
-            }
+            futureslist.push(f)
         }
+        
+        info!(" >>> notifying main thread we are about to start");
+        let x = join_all(futureslist).await;
+        x.into_iter().nth(0).unwrap()
     }
 
     async fn load_resolved_app_source(
@@ -414,7 +407,24 @@ pub enum ResolvedAppSource {
 }
 
 impl ResolvedAppSource {
-    pub fn trigger_type(&self) -> anyhow::Result<&str> {
+    // pub fn trigger_type(&self) -> anyhow::Result<&str> {
+    //     let types = match self {
+    //         ResolvedAppSource::File { manifest, .. } => {
+    //             manifest.triggers.keys().collect::<HashSet<_>>()
+    //         }
+    //         ResolvedAppSource::OciRegistry { locked_app } => locked_app
+    //             .triggers
+    //             .iter()
+    //             .map(|t| &t.trigger_type)
+    //             .collect::<HashSet<_>>(),
+    //     };
+
+    //     ensure!(!types.is_empty(), "no triggers in app");
+    //     ensure!(types.len() == 1, "multiple trigger types not yet supported");
+    //     Ok(types.into_iter().next().unwrap())
+    // }
+
+    pub fn trigger_types(&self) -> anyhow::Result<Vec<&str>> {
         let types = match self {
             ResolvedAppSource::File { manifest, .. } => {
                 manifest.triggers.keys().collect::<HashSet<_>>()
@@ -427,22 +437,26 @@ impl ResolvedAppSource {
         };
 
         ensure!(!types.is_empty(), "no triggers in app");
-        ensure!(types.len() == 1, "multiple trigger types not yet supported");
-        Ok(types.into_iter().next().unwrap())
+        Ok(types.into_iter().map(|t| t.as_str()).collect())
     }
 }
 
-fn trigger_command_for_resolved_app_source(resolved: &ResolvedAppSource) -> Result<String> {
-    let trigger_type = resolved.trigger_type()?;
+fn trigger_command_for_resolved_app_source(resolved: &ResolvedAppSource) -> Result<Vec<String>> {
+    let trigger_types = resolved.trigger_types()?;
 
-    match trigger_type {
-        RedisTrigger::TRIGGER_TYPE | HttpTrigger::TRIGGER_TYPE | SqsTrigger::TRIGGER_TYPE => {
-            Ok(trigger_type.to_owned())
-        }
-        _ => {
-            todo!("Only Http, Redis and SQS triggers are currently supported.")
+    let mut types = vec![];
+    for trigger_type in trigger_types.iter() {
+        match trigger_type.to_owned() {
+            RedisTrigger::TRIGGER_TYPE | HttpTrigger::TRIGGER_TYPE | SqsTrigger::TRIGGER_TYPE => {
+                types.push(trigger_type)
+            }
+            _ => {
+                todo!("Only Http, Redis and SQS triggers are currently supported.")
+            }
         }
     }
+
+    Ok(trigger_types.iter().map(|x| x.to_string()).collect())
 }
 
 #[cfg(test)]

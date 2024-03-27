@@ -7,7 +7,7 @@ mod engine;
 fn main() {
     // Configure the shim to have only error level logging for performance improvements.
     let shim_config = Config {
-        default_log_level: "error".to_string(),
+        default_log_level: "info".to_string(),
         ..Default::default()
     };
     shim_main::<Instance<engine::SpinEngine>>(
