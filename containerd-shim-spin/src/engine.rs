@@ -243,9 +243,6 @@ impl SpinEngine {
         drop(rest);
         
         result
-        // info!(" >>> notifying main thread we are about to start");
-        // let x = join_all(futureslist).await;
-        // x.into_iter().nth(0).unwrap()
     }
 
     async fn load_resolved_app_source(
