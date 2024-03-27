@@ -186,7 +186,12 @@ impl SpinEngine {
         let trigger_cmds = trigger_command_for_resolved_app_source(&resolved_app_source)
             .with_context(|| format!("Couldn't find trigger executor for {app_source:?}"))?;
         let locked_app = self.load_resolved_app_source(resolved_app_source).await?;
-        self.run_trigger(trigger_cmds.iter().map(|s| s.as_ref()).collect(), locked_app, app_source).await
+        self.run_trigger(
+            trigger_cmds.iter().map(|s| s.as_ref()).collect(),
+            locked_app,
+            app_source,
+        )
+        .await
     }
 
     async fn run_trigger(
@@ -204,7 +209,7 @@ impl SpinEngine {
                         .build_spin_trigger(working_dir.clone(), app.clone(), app_source.clone())
                         .await
                         .context("failed to build spin trigger")?;
-    
+
                     info!(" >>> running spin http trigger");
                     http_trigger.run(spin_trigger_http::CliArgs {
                         address: parse_addr(SPIN_ADDR).unwrap(),
@@ -217,7 +222,7 @@ impl SpinEngine {
                         .build_spin_trigger(working_dir.clone(), app.clone(), app_source.clone())
                         .await
                         .context("failed to build spin trigger")?;
-    
+
                     info!(" >>> running spin redis trigger");
                     redis_trigger.run(spin_trigger::cli::NoArgs)
                 }
@@ -226,7 +231,7 @@ impl SpinEngine {
                         .build_spin_trigger(working_dir.clone(), app.clone(), app_source.clone())
                         .await
                         .context("failed to build spin trigger")?;
-    
+
                     info!(" >>> running spin sqs trigger");
                     sqs_trigger.run(spin_trigger::cli::NoArgs)
                 }
@@ -242,7 +247,7 @@ impl SpinEngine {
         let (result, _, rest) = future::select_all(futures_list).await;
 
         drop(rest);
-        
+
         result
     }
 
