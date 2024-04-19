@@ -15,8 +15,8 @@ spec:
       runtimeClassName: wasmtime-spin
       containers:
         - name: testwasm
-          image: docker.io/library/spin-hello-world:latest
-          imagePullPolicy: Never # prevent k8s from pulling the image from a registry
+          image: test-registry:5000/spin-hello-world:latest
+          imagePullPolicy: IfNotPresent
           command: ["/"]
           resources: # limit the resources to 128Mi of memory and 100m of CPU
             limits:
@@ -55,7 +55,7 @@ spec:
       runtimeClassName: wasmtime-spin
       containers:
         - name: keyvalue
-          image: docker.io/library/spin-keyvalue:latest
+          image: test-registry:5000/spin-keyvalue:latest
           command: ["/"]
           imagePullPolicy: IfNotPresent
           volumeMounts:
@@ -98,7 +98,7 @@ spec:
       runtimeClassName: wasmtime-spin
       containers:
         - name: outbound-redis
-          image: docker.io/library/spin-outbound-redis:latest
+          image: test-registry:5000/spin-outbound-redis:latest
           command: ["/"]
           imagePullPolicy: IfNotPresent
           env:
@@ -192,7 +192,7 @@ spec:
       runtimeClassName: wasmtime-spin
       containers:
       - name: spin-multi-trigger-app
-        image: docker.io/library/spin-multi-trigger-app:latest
+        image: test-registry:5000/spin-multi-trigger-app:latest
         imagePullPolicy: IfNotPresent
         command: ["/"]
         ports:

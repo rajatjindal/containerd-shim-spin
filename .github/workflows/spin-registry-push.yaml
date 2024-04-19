@@ -1,0 +1,70 @@
+# name: 'spin registry push'
+# on:
+#   pull_request:
+#     branches: ["main"]
+#   workflow_call:
+#     inputs:
+#       test:
+#         description: 'Is this a test run?'
+#         type: boolean
+#         required: true
+# jobs:
+#   build_and_push:
+#     permissions:
+#       contents: write
+#       packages: write
+#     runs-on: ubuntu-latest
+#     strategy:
+#       matrix:
+#         image:
+#           - imageName: spin-registry-push-apps/spin-multi-trigger-app
+#             context: images/spin-multi-trigger-app
+#     steps:
+#       - uses: actions/checkout@v4
+
+#       - name: Set RELEASE_VERSION ENV var
+#         run: echo "RELEASE_VERSION=$(echo -n ${GITHUB_REF} | cut -d '/' -f 3)" >> $GITHUB_ENV
+
+#       - uses: actions/setup-go@v5
+#         with:
+#           go-version: 1.22
+
+#       - uses: acifani/setup-tinygo@v2
+#         with:
+#           tinygo-version: '0.31.2'
+
+#       - name: setup spin
+#         uses: fermyon/actions/spin/setup@v1
+#         with:
+#           version: v2.4.2
+
+#       - name: Install latest Rust stable toolchain
+#         shell: bash
+#         run: |
+#           rustup toolchain install 1.72 --component clippy --component rustfmt --no-self-update
+#           rustup default 1.72
+
+#       - name: "Install Wasm Rust target"
+#         run: rustup target add wasm32-wasi && rustup target add wasm32-unknown-unknown
+#         shell: bash
+
+#       - name: lowercase the runner OS name
+#         shell: bash
+#         run: |
+#           OS=$(echo "${{ runner.os }}" | tr '[:upper:]' '[:lower:]')
+#           echo "RUNNER_OS=$OS" >> $GITHUB_ENV
+
+#       - name: login to GitHub container registry
+#         uses: docker/login-action@v3
+#         with:
+#           registry: ghcr.io
+#           username: ${{ github.actor }}
+#           password: ${{ secrets.GITHUB_TOKEN }}
+      
+#       - name: build spin app
+#         working-directory: ${{ matrix.image.context }}
+#         run: spin build
+
+#       - name: push to registry
+#         working-directory: ${{ matrix.image.context }}
+#         run: spin registry push ghcr.io/${{ github.repository }}/${{ matrix.image.imageName }}:${{ env.RELEASE_VERSION }}
