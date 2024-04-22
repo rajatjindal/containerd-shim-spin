@@ -30,6 +30,10 @@ check-bins:
 move-bins:
 	./scripts/move-bins.sh $(BIN_DIR)
 
+./PHONY: build-and-push-test-apps
+build-and-push-test-apps:
+	./scripts/build-and-push-test-apps.sh
+
 ./PHONY: up
 up:
 	./scripts/up.sh
@@ -47,7 +51,7 @@ test-workloads-delete:
 	./scripts/workloads-delete.sh
 
 .PHONY: integration-tests
-integration-tests: check-bins move-bins up pod-status-check workloads test-workloads-delete
+integration-tests: check-bins move-bins up build-and-push-test-apps pod-status-check workloads test-workloads-delete
 	cargo test -p containerd-shim-spin-tests -- --nocapture
 
 .PHONY: tests/collect-debug-logs
