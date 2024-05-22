@@ -25,6 +25,7 @@ use spin_trigger_http::HttpTrigger;
 use spin_trigger_redis::RedisTrigger;
 use tokio::runtime::Runtime;
 use trigger_command::CommandTrigger;
+use trigger_cron::CronTrigger;
 use trigger_sqs::SqsTrigger;
 use url::Url;
 
@@ -259,6 +260,15 @@ impl SpinEngine {
                         guest_args: ctx.args().to_vec(),
                     })
                 }
+                CronTrigger::TRIGGER_TYPE => {
+                    let cron_trigger: CronTrigger = self
+                        .build_spin_trigger(working_dir.clone(), app.clone(), app_source.clone())
+                        .await
+                        .context("failed to build spin trigger")?;
+
+                    info!(" >>> running spin cron trigger");
+                    cron_trigger.run(spin_trigger::cli::NoArgs)
+                }
                 _ => {
                     todo!("Only Http, Redis and SQS triggers are currently supported.")
                 }
@@ -486,7 +496,8 @@ fn trigger_command_for_resolved_app_source(resolved: &ResolvedAppSource) -> Resu
             RedisTrigger::TRIGGER_TYPE
             | HttpTrigger::TRIGGER_TYPE
             | SqsTrigger::TRIGGER_TYPE
-            | CommandTrigger::TRIGGER_TYPE => types.push(trigger_type),
+            | CommandTrigger::TRIGGER_TYPE
+            | CronTrigger::TRIGGER_TYPE => types.push(trigger_type),
             _ => {
                 todo!("Only Http, Redis and SQS triggers are currently supported.")
             }
